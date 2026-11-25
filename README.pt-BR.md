@@ -107,6 +107,23 @@ cp .env.example .env   # defina PANEL_USER e PANEL_PASS
 docker compose up -d
 ```
 
+**Sem compose.** A mesma imagem roda com Docker puro. O volume nomeado guarda a sessão do WhatsApp e os dados quando o container é recriado:
+
+```bash
+docker run -d --name wacrew --restart unless-stopped \
+  -p 3000:3000 \
+  -v wacrew-data:/data \
+  -e NODE_ENV=production -e PORT=3000 \
+  -e AUTH_DIR=/data/auth -e DATA_DIR=/data/data \
+  -e WAC_DATA_DIR=/data/data \
+  -e GROUPS_CONFIG=/data/groups.config.json \
+  -e WAC_GROUPS_CONFIG=/data/groups.config.json \
+  -e PANEL_USER=admin -e PANEL_PASS='troque-esta-senha' \
+  ghcr.io/sumioshi/wacrew:latest
+```
+
+Depois abra `http://localhost:3000/config` para escanear o QR.
+
 <a href="https://www.hostinger.com/br/servidor-vps?REFERRALCODE=ORISHODIRBUH"><img alt="Implantar na Hostinger" src="docs/assets/deploy-hostinger-pt.svg" height="32"></a> <a href="https://railway.com/deploy/wacrew?referralCode=8ZIi5q&utm_medium=integration&utm_source=template&utm_campaign=generic"><img alt="Deploy on Railway" src="https://railway.com/button.svg" height="32"></a>
 
 <sub>Links de indicação: você ganha desconto ou créditos, e o projeto recebe uma comissão que ajuda a mantê-lo. Na Railway o template já cria o volume, o login e uma senha gerada para você.</sub>

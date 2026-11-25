@@ -107,6 +107,23 @@ cp .env.example .env   # set PANEL_USER and PANEL_PASS
 docker compose up -d
 ```
 
+**Without compose.** The same image runs with plain Docker. The named volume keeps the WhatsApp session and data when the container is recreated:
+
+```bash
+docker run -d --name wacrew --restart unless-stopped \
+  -p 3000:3000 \
+  -v wacrew-data:/data \
+  -e NODE_ENV=production -e PORT=3000 \
+  -e AUTH_DIR=/data/auth -e DATA_DIR=/data/data \
+  -e WAC_DATA_DIR=/data/data \
+  -e GROUPS_CONFIG=/data/groups.config.json \
+  -e WAC_GROUPS_CONFIG=/data/groups.config.json \
+  -e PANEL_USER=admin -e PANEL_PASS='change-this-password' \
+  ghcr.io/sumioshi/wacrew:latest
+```
+
+Then open `http://localhost:3000/config` to scan the QR code.
+
 <a href="https://www.hostinger.com/vps-hosting?REFERRALCODE=ORISHODIRBUH"><img alt="Deploy on Hostinger" src="docs/assets/deploy-hostinger-en.svg" height="32"></a> <a href="https://railway.com/deploy/wacrew?referralCode=8ZIi5q&utm_medium=integration&utm_source=template&utm_campaign=generic"><img alt="Deploy on Railway" src="https://railway.com/button.svg" height="32"></a>
 
 <sub>Referral links: you get a discount or credits, and the project earns a commission that helps keep it maintained. On Railway the template sets up the volume, the login and a generated password for you.</sub>
