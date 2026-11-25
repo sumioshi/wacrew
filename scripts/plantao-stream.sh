@@ -36,6 +36,36 @@
 # do repositório; senão ~/.wacrew/env, que serve à cópia do script dentro de um plugin.
 
 set -u
+for ARG do
+  case "$ARG" in
+    -h|--help)
+      cat <<'EOF'
+uso: plantao-stream.sh [--uma-vez] <slug> [slug...] | --alertar
+     plantao-stream.sh -h | --help
+
+Plantão de mensagens via SSE da nuvem (/api/events).
+
+Modos e opções:
+  <slug> [slug...]         monitora uma ou mais conversas (com várias, prefixa [slug])
+  --alertar                monitora conversas com alerta ligado
+  --uma-vez                imprime o primeiro evento e sai com 0 (salva cursor)
+  -h, --help               mostra esta ajuda e sai com 0
+
+Variáveis de ambiente (ordem: env, WAC_ENV_FILE, .env da raiz, ~/.wacrew/env):
+  WAC_CLOUD_URL/USER/PASS  credenciais do coletor principal
+  WAC_ENV_FILE             arquivo de credenciais alternativo
+  PLANTAO_CLOUD=pessoal    troca pro coletor pessoal (trio WAC_PESSOAL_URL/USER/PASS)
+  PLANTAO_STATE_DIR        lock e cursor (default: $TMPDIR ou /tmp)
+  PLANTAO_RETRY_S          espera em s antes de reconectar (default: 5)
+  PLANTAO_RECONNECT_S      reconecta a cada N s retomando pelo cursor (default: 600)
+  PLANTAO_CURSOR_MAX_MIN   descarta cursor mais velho que N min no --uma-vez (default: 60)
+
+Códigos de saída: 2 (uso incorreto), 3 (plantão já ativo)
+EOF
+      exit 0
+      ;;
+  esac
+done
 UMA_VEZ=0
 if [ "${1:-}" = "--uma-vez" ]; then UMA_VEZ=1; shift; fi
 [ $# -ge 1 ] || { echo "uso: plantao-stream.sh [--uma-vez] <slug> [slug...] | --alertar" >&2; exit 2; }
