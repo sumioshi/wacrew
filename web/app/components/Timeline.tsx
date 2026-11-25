@@ -13,6 +13,7 @@ import {
   ultimoGroupJid,
 } from "@/lib/caixa";
 import type { MessageView } from "@/lib/data";
+import { fundirMensagens } from "@/lib/dm-irmaos";
 import { instanteLongo } from "@/lib/formatar-data";
 import { Bubble } from "./chat/Bubble";
 import { Composer } from "./chat/Composer";
@@ -170,7 +171,7 @@ export function Timeline({
 
   // Pagina o histórico para cima (como no WhatsApp), preservando a posição.
   const loadOlder = useCallback(async () => {
-    const first = messages[0];
+    const first = messages.find((m) => m.type !== "call");
     if (!first || loadingOlder) return;
     setLoadingOlder(true);
     try {
@@ -186,8 +187,8 @@ export function Timeline({
       }
       const el = scrollRef.current;
       const prevHeight = el?.scrollHeight ?? 0;
-      setMessages((cur) => [...older, ...cur]);
-      if (older.length < 150) setHasMore(false);
+      setMessages((cur) => fundirMensagens([older, cur]));
+      if (older.filter((m) => m.type !== "call").length < 150) setHasMore(false);
       // Reancora a rolagem depois que o bloco novo pintar acima.
       requestAnimationFrame(() => {
         if (el) el.scrollTop += el.scrollHeight - prevHeight;
@@ -340,7 +341,7 @@ export function Timeline({
         const kept = cur.filter((m) => !ids.has(m.id));
         const firstTailTs = tail[0]?.timestamp ?? "";
         const older = kept.filter((m) => m.timestamp <= firstTailTs);
-        const next = [...older, ...tail];
+        const next = fundirMensagens([older, tail]);
         setTotalCount((t) => Math.max(t, next.length));
         return next;
       });

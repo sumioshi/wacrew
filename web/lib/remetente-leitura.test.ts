@@ -20,6 +20,18 @@ beforeAll(async () => {
   const dir = join(tmp, 'data');
   await mkdir(join(dir, 'dm-5511900000002'), { recursive: true });
   await mkdir(join(dir, 'grupo-b'), { recursive: true });
+  await mkdir(join(dir, 'backfill'), { recursive: true });
+  const base = { group: 'Teste', groupJid: GRUPO, sender: DM, senderName: 'Cliente' };
+  await writeFile(
+    join(dir, 'backfill', 'messages.jsonl'),
+    linha({ ...base, id: 'recente', timestamp: '2026-10-08T12:05:00.000Z' }) +
+      linha({ ...base, id: 'recente-2', timestamp: '2026-10-08T12:05:00.000Z' }) +
+      linha({ ...base, id: 'antiga', timestamp: '2026-10-08T12:00:00.000Z' }),
+  );
+  await writeFile(
+    join(dir, 'backfill', 'calls.jsonl'),
+    linha({ callId: 'C1', timestamp: '2026-10-08T12:03:00.000Z', from: DM, fromName: 'Cliente' }),
+  );
   await writeFile(
     join(dir, 'dm-5511900000002', 'messages.jsonl'),
     linha({
@@ -62,6 +74,19 @@ beforeAll(async () => {
   data = await import('./data');
   contatos = await import('./contacts');
   inbox = await import('./inbox');
+});
+
+describe('ordenação do histórico recuperado', () => {
+  it('ordena mensagens antes de montar a janela e preserva a ordem dentro do mesmo segundo', async () => {
+    expect((await data.readGroupRecords('backfill')).map((m) => m.id)).toEqual(['antiga', 'recente', 'recente-2']);
+    expect((await data.readGroupMessages('backfill', { limit: 2 })).map((m) => m.id)).toEqual(['recente', 'recente-2']);
+  });
+
+  it('traz a mensagem antiga e a chamada anterior na página certa', async () => {
+    const pagina = await data.readGroupMessages('backfill', { before: 'recente', limit: 2 });
+    expect(pagina.map((m) => m.id)).toEqual(['antiga', 'call:C1']);
+    expect(await data.readGroupMessages('backfill', { before: 'antiga', limit: 2 })).toEqual([]);
+  });
 });
 
 afterAll(async () => {

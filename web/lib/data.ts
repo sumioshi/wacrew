@@ -252,7 +252,8 @@ function parseJsonl(raw: string): MessageRecord[] {
       // linha corrompida (ex.: escrita parcial concorrente) — ignora
     }
   }
-  return out;
+  // O coletor grava por chegada. Backfills podem anexar mensagens antigas ao fim.
+  return out.sort((a, b) => (a.timestamp ?? '').localeCompare(b.timestamp ?? ''));
 }
 
 /** Caminho do sidecar de transcrição para uma mídia. */
@@ -688,15 +689,18 @@ export async function readGroupMessages(
   const all = await cachedByStat(jsonlPath, parseJsonl);
   if (!all) return [];
   let records = all;
+  let inicio = 0;
+  let antesDe: string | undefined;
   if (opts.limit || opts.before) {
     let end = all.length;
     if (opts.before) {
       const idx = all.findIndex((r) => r.id === opts.before);
       if (idx < 0) return []; // âncora sumiu (rotação/merge) → fim da paginação
       end = idx;
+      antesDe = all[idx]?.timestamp;
     }
-    const start = Math.max(0, end - (opts.limit ?? end));
-    records = all.slice(start, end);
+    inicio = Math.max(0, end - (opts.limit ?? end));
+    records = all.slice(inicio, end);
   }
   const [reactions, contacts] = await Promise.all([
     readReactions(slug),
@@ -734,10 +738,9 @@ export async function readGroupMessages(
   // restritas ao intervalo da janela, senão chamadas antigas vazam pra dentro dela.
   let windowCalls = calls;
   if ((opts.limit || opts.before) && calls.length > 0) {
-    const first = records[0]?.timestamp;
-    const last = opts.before ? records[records.length - 1]?.timestamp : undefined;
+    const first = inicio > 0 ? records[0]?.timestamp : undefined;
     windowCalls = calls.filter(
-      (c) => (!first || c.timestamp >= first) && (!last || c.timestamp <= last),
+      (c) => (!first || c.timestamp >= first) && (!antesDe || c.timestamp < antesDe),
     );
   }
   if (windowCalls.length === 0) return views;
