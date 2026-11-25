@@ -51,8 +51,9 @@ Modos e opções:
   --uma-vez                imprime o primeiro evento e sai com 0 (salva cursor)
   -h, --help               mostra esta ajuda e sai com 0
 
-Variáveis de ambiente (ordem: env, WAC_ENV_FILE, .env da raiz, ~/.wacrew/env):
-  WAC_CLOUD_URL/USER/PASS  credenciais do coletor principal
+Variáveis de ambiente:
+  WAC_CLOUD_URL/USER/PASS  credenciais do coletor principal; sem WAC_CLOUD_URL no env,
+                           carrega o 1º arquivo que existir: WAC_ENV_FILE, .env da raiz, ~/.wacrew/env
   WAC_ENV_FILE             arquivo de credenciais alternativo
   PLANTAO_CLOUD=pessoal    troca pro coletor pessoal (trio WAC_PESSOAL_URL/USER/PASS)
   PLANTAO_STATE_DIR        lock e cursor (default: $TMPDIR ou /tmp)
