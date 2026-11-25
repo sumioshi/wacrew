@@ -245,3 +245,36 @@ describe('plantao-stream.sh --uma-vez', { timeout: 15_000 }, () => {
     expect(out).toEqual(['Ana: oi']);
   });
 });
+
+describe('plantao-stream.sh --help', { timeout: 15_000 }, () => {
+  it('--help imprime o uso, sai com 0 e não faz pedidos ao servidor', async () => {
+    responder = () => {
+      /* não deve conectar */
+    };
+    const { p, out, err, saida } = rodar(['--help']);
+    const fechou = new Promise<void>((r) => p.once('close', () => r()));
+    expect(await saida).toBe(0);
+    await fechou;
+    const texto = out.join('\n');
+    expect(texto).toContain('--uma-vez');
+    expect(texto).toContain('--alertar');
+    expect(err.join('')).toBe('');
+    expect(pedidos).toHaveLength(0);
+  });
+
+  it('-h funciona sem credenciais configuradas (apenas PATH no env)', async () => {
+    const p = spawn('sh', [SCRIPT, '-h'], {
+      env: { PATH: process.env.PATH ?? '' },
+      detached: true,
+    });
+    procs.push(p);
+    const out: string[] = [];
+    const err: string[] = [];
+    p.stdout.on('data', (b: Buffer) => out.push(b.toString()));
+    p.stderr.on('data', (b: Buffer) => err.push(b.toString()));
+    const codigo = await new Promise<number | null>((res) => p.on('close', (c) => res(c)));
+    expect(codigo).toBe(0);
+    expect(out.join('')).toContain('--uma-vez');
+    expect(err.join('')).toBe('');
+  });
+});
