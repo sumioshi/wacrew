@@ -1,0 +1,10 @@
+contact_links:
+  - name: Dúvidas / Questions
+    url: https://github.com/sumioshi/wacrew/discussions
+    about: Tire dúvidas e peça ajuda no Discussions / Ask questions and get help in Discussions.
+  - name: Instalação / Installation
+    url: https://github.com/sumioshi/wacrew/blob/main/README.md#quick-start
+    about: Consulte os requisitos e o guia de instalação / Read the requirements and installation guide.
+  - name: Configuração do MCP / MCP setup
+    url: https://github.com/sumioshi/wacrew/blob/main/README.md#mcp-tools
+    about: Veja como conectar seu cliente MCP ao WACrew / Learn how to connect your MCP client to WACrew.
