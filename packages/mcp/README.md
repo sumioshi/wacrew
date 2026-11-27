@@ -1,4 +1,3 @@
-
 # wacrew-mcp
 
 MCP server for [WACrew](https://wacrew.com.br): open-source WhatsApp AI automation.
