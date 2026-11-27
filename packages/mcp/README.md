@@ -45,6 +45,19 @@ agy mcp add \
   wacrew npx -y wacrew-mcp
 ```
 
+In Codex, add the following to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.wacrew]
+command = "npx"
+args = ["-y", "wacrew-mcp"]
+
+[mcp_servers.wacrew.env]
+WAC_CLOUD_URL = "https://your-panel.example.com"
+WAC_CLOUD_USER = "admin"
+WAC_CLOUD_PASS = "change-me"
+```
+
 **More than one WhatsApp.** One server can talk to several panels. Add the others in `WAC_CONTAS` as `name=https://login:password@address`, separated by spaces (or put them after the main address in `WAC_CLOUD_URL`). Every tool then takes an optional `conta` parameter, and the agent picks the account per call. `WAC_CONTA_NOME` names the default one:
 
 ```bash
